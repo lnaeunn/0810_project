@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ champ.name }} - 롤린이 가이드</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="app">
+
+        <a href="{{ url_for('home') }}" class="back-btn">← 목록으로</a>
+
+        <div class="champ-splash">
+            <img src="{{ champ.splash }}" alt="{{ champ.name }}">
+        </div>
+
+        <div class="champ-header">
+            <img class="champ-icon" src="{{ champ.icon }}" alt="{{ champ.name }}">
+            <div>
+                <h1 class="champ-name">{{ champ.name }}</h1>
+                <p class="champ-title">{{ champ.title }}</p>
+            </div>
+        </div>
+
+        <div class="tag-row">
+            {% for tag in champ.tags %}
+            <span class="tag-badge">{{ tag }}</span>
+            {% endfor %}
+        </div>
+
+        <h2 class="section-title">스킬</h2>
+
+        <div class="skill-card">
+            <div class="skill-header">
+                <img class="skill-icon" src="{{ champ.passive.image }}" alt="{{ champ.passive.name }}">
+                <div class="skill-title-group">
+                    <span class="skill-key passive-key">P</span>
+                    <span class="skill-name">{{ champ.passive.name }}</span>
+                </div>
+                <button class="explain-btn" data-target="desc-passive">쉽게 설명 보기</button>
+            </div>
+            <p class="skill-desc" id="desc-passive">{{ champ.passive.description | safe }}</p>
+        </div>
+
+        {% for spell in champ.spells %}
+        <div class="skill-card">
+            <div class="skill-header">
+                <img class="skill-icon" src="{{ spell.image }}" alt="{{ spell.name }}">
+                <div class="skill-title-group">
+                    <span class="skill-key">{{ spell.key }}</span>
+                    <span class="skill-name">{{ spell.name }}</span>
+                </div>
+                <button class="explain-btn" data-target="desc-{{ spell.key }}">쉽게 설명 보기</button>
+            </div>
+            <p class="skill-desc" id="desc-{{ spell.key }}">{{ spell.description | safe }}</p>
+        </div>
+        {% endfor %}
+
+        <p class="ai-note">💡 지금 보이는 설명은 Riot 원문이야. 다음 단계에서 AI가 초보자용으로 쉽게 풀어주는 버전으로 바꿀 거야.</p>
+
+    </div>
+
+    <script>
+        document.querySelectorAll(".explain-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const target = document.getElementById(btn.dataset.target);
+                target.classList.toggle("open");
+                btn.textContent = target.classList.contains("open") ? "설명 접기" : "쉽게 설명 보기";
+            });
+        });
+    </script>
+
+</body>
+</html>

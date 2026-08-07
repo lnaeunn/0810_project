@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LoL Easy</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <div class="app">
+
+        <header class="header">
+            <h1>
+                <svg class="logo-icon" width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16 2 L28 6.5 V15 C28 22.5 22.5 27.5 16 30 C9.5 27.5 4 22.5 4 15 V6.5 Z"
+                          fill="#1c1f27" stroke="#4f7cff" stroke-width="2" stroke-linejoin="round"/>
+                    <line x1="9.5" y1="21" x2="22" y2="8.5" stroke="#4f7cff" stroke-width="2.4" stroke-linecap="round"/>
+                    <line x1="17.5" y1="10.5" x2="21.5" y2="14.5" stroke="#4f7cff" stroke-width="2.4" stroke-linecap="round"/>
+                    <circle cx="9.5" cy="21" r="1.9" fill="#4f7cff"/>
+                </svg>
+                LoL Easy
+            </h1>
+            <p class="subtitle">롤 입문자를 위한 AI 챔피언 가이드</p>
+        </header>
+
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="챔피언 검색" id="searchInput">
+        </div>
+
+        <p class="count-text">총 <span id="countNum">{{ champions|length }}</span>명의 챔피언</p>
+
+        <div class="filter-bar" id="filterBar">
+            <button class="filter-btn active" data-tag="all">전체</button>
+            <button class="filter-btn" data-tag="Tank">🛡 탱커</button>
+            <button class="filter-btn" data-tag="Fighter">⚔ 전사</button>
+            <button class="filter-btn" data-tag="Mage">🔮 마법사</button>
+            <button class="filter-btn" data-tag="Assassin">🗡 암살자</button>
+            <button class="filter-btn" data-tag="Marksman">🏹 원거리딜러</button>
+            <button class="filter-btn" data-tag="Support">💫 서포터</button>
+        </div>
+
+        <div class="champion-list" id="championList">
+            {% for champ in champions %}
+            <a class="champion-card" href="{{ url_for('champion_detail', champ_id=champ.id) }}" data-tags="{{ champ.tags|join(',') }}">
+                <img class="champion-img" src="{{ champ.image }}" alt="{{ champ.name }}">
+                <span class="champion-name">{{ champ.name }}</span>
+            </a>
+            {% endfor %}
+        </div>
+
+    </div>
+
+    <script>
+        const input = document.getElementById("searchInput");
+        const cards = document.querySelectorAll(".champion-card");
+        const filterBtns = document.querySelectorAll(".filter-btn");
+        const countNum = document.getElementById("countNum");
+
+        let activeTag = "all";
+
+        function applyFilters() {
+            const keyword = input.value.trim();
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const name = card.querySelector(".champion-name").textContent;
+                const tags = card.dataset.tags.split(",");
+
+                const matchesSearch = name.includes(keyword);
+                const matchesTag = activeTag === "all" || tags.includes(activeTag);
+
+                if (matchesSearch && matchesTag) {
+                    card.style.display = "flex";
+                    visibleCount++;
+                } else {
+                    card.style.display = "none";
+                }
+            });
+
+            countNum.textContent = visibleCount;
+        }
+
+        input.addEventListener("input", applyFilters);
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener("click", () => {
+                filterBtns.forEach(b => b.classList.remove("active"));
+                btn.classList.add("active");
+                activeTag = btn.dataset.tag;
+                applyFilters();
+            });
+        });
+    </script>
+
+</body>
+</html>
