@@ -6,7 +6,7 @@
 }
 
 body {
-    background: #0f1117;
+    background: radial-gradient(circle at 50% 0%, #171a24 0%, #0f1117 55%);
     color: #f0f0f0;
     display: flex;
     justify-content: center;
@@ -17,6 +17,13 @@ body {
     width: 100%;
     max-width: 420px;
     padding: 24px 16px 40px;
+}
+
+@media (min-width: 700px) {
+    .app {
+        max-width: 900px;
+        padding: 32px 24px 60px;
+    }
 }
 
 .header {
@@ -50,6 +57,11 @@ body {
     padding: 10px 14px;
     margin-bottom: 20px;
     border: 1px solid #2a2e39;
+    transition: border-color 0.15s ease;
+}
+
+.search-box:focus-within {
+    border-color: #4f7cff;
 }
 
 .search-icon {
@@ -113,10 +125,38 @@ body {
     border-color: #4f7cff;
 }
 
+.sticky-controls {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: linear-gradient(#0f1117 78%, transparent);
+    padding-top: 4px;
+    margin-top: -4px;
+}
+
 .champion-list {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
+}
+
+@media (min-width: 480px) {
+    .champion-list {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 700px) {
+    .champion-list {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 14px;
+    }
+}
+
+@media (min-width: 900px) {
+    .champion-list {
+        grid-template-columns: repeat(7, 1fr);
+    }
 }
 
 .champion-card {
@@ -128,15 +168,34 @@ body {
     border: 1px solid #2a2e39;
     border-radius: 12px;
     padding: 10px 6px 12px;
-    transition: transform 0.15s ease, background 0.15s ease;
+    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
     cursor: pointer;
     text-decoration: none;
     color: inherit;
+    opacity: 0;
+    animation: card-in 0.35s ease forwards;
+}
+
+@keyframes card-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .champion-card:hover {
     background: #262a35;
-    transform: translateY(-2px);
+    border-color: #3a3f4d;
+    transform: translateY(-3px);
+}
+
+.champion-card:active {
+    transform: translateY(0) scale(0.96);
+    background: #21252f;
 }
 
 .champion-img {
@@ -145,12 +204,25 @@ body {
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #2a2e39;
+    transition: border-color 0.15s ease;
+}
+
+.champion-card:hover .champion-img {
+    border-color: #4f7cff;
 }
 
 .champion-name {
     font-size: 13px;
     font-weight: 500;
     text-align: center;
+}
+
+.empty-state {
+    display: none;
+    text-align: center;
+    color: #6b7280;
+    font-size: 14px;
+    padding: 40px 0;
 }
 
 /* ------------------------------------------------------------ */
@@ -163,10 +235,22 @@ body {
     text-decoration: none;
     font-size: 14px;
     margin-bottom: 14px;
+    transition: color 0.15s ease;
 }
 
 .back-btn:hover {
     color: #f0f0f0;
+}
+
+.detail-wrap {
+    animation: card-in 0.3s ease;
+}
+
+@media (min-width: 700px) {
+    .detail-wrap {
+        max-width: 640px;
+        margin: 0 auto;
+    }
 }
 
 .champ-splash {
@@ -241,6 +325,8 @@ body {
     border-radius: 12px;
     padding: 14px;
     margin-bottom: 10px;
+    opacity: 0;
+    animation: card-in 0.35s ease forwards;
 }
 
 .skill-header {
@@ -296,10 +382,34 @@ body {
     cursor: pointer;
     white-space: nowrap;
     flex-shrink: 0;
+    transition: background 0.15s ease, opacity 0.15s ease;
 }
 
 .explain-btn:hover {
     background: #262a35;
+}
+
+.explain-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.spinner {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border: 2px solid #3a3f4d;
+    border-top-color: #4f7cff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .skill-desc {
@@ -322,4 +432,108 @@ body {
     text-align: center;
     margin-top: 20px;
     line-height: 1.5;
+}
+
+/* 추천 스킬 순서 카드 */
+.priority-card {
+    background: linear-gradient(135deg, #1c1f27, #1a2038);
+    border: 1px solid #35406b;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 22px;
+}
+
+.priority-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.priority-icon {
+    font-size: 14px;
+}
+
+.priority-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #9db4ff;
+}
+
+.priority-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #dfe2e8;
+    white-space: pre-line;
+}
+
+/* ------------------------------------------------------------ */
+/* 스킬 아이콘 한 줄 + 상세 패널 (기존 skill-card 방식 대체)          */
+/* ------------------------------------------------------------ */
+
+.skill-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.skill-box {
+    position: relative;
+    flex: 1;
+    aspect-ratio: 1 / 1;
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    border: 2px solid #2a2e39;
+    padding: 0;
+    cursor: pointer;
+    transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.skill-box:hover {
+    transform: translateY(-2px);
+}
+
+.skill-box.active {
+    border-color: #4f7cff;
+    box-shadow: 0 0 0 2px rgba(79, 124, 255, 0.35);
+}
+
+.skill-box-key {
+    position: absolute;
+    bottom: 3px;
+    right: 3px;
+    background: #4f7cff;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    text-align: center;
+    border-radius: 4px;
+}
+
+.skill-box-key.passive-key {
+    background: #6b7280;
+}
+
+.skill-detail-panel {
+    background: #1c1f27;
+    border: 1px solid #2a2e39;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 20px;
+}
+
+.skill-detail-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.skill-detail-name {
+    font-size: 15px;
+    font-weight: 600;
 }
