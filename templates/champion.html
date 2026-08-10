@@ -1,76 +1,468 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ champ.name }} - 롤린이 가이드</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Apple SD Gothic Neo", "Segoe UI", sans-serif;
+}
 
-    <div class="app">
+body {
+    background: radial-gradient(circle at 50% 0%, #171a24 0%, #0f1117 55%);
+    color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    min-height: 100vh;
+}
 
-        <a href="{{ url_for('home') }}" class="back-btn">← 목록으로</a>
+.app {
+    width: 100%;
+    max-width: 420px;
+    padding: 24px 16px 40px;
+}
 
-        <div class="champ-splash">
-            <img src="{{ champ.splash }}" alt="{{ champ.name }}">
-        </div>
+@media (min-width: 700px) {
+    .app {
+        max-width: 900px;
+        padding: 32px 24px 60px;
+    }
+}
 
-        <div class="champ-header">
-            <img class="champ-icon" src="{{ champ.icon }}" alt="{{ champ.name }}">
-            <div>
-                <h1 class="champ-name">{{ champ.name }}</h1>
-                <p class="champ-title">{{ champ.title }}</p>
-            </div>
-        </div>
+.header {
+    text-align: center;
+    margin-bottom: 20px;
+}
 
-        <div class="tag-row">
-            {% for tag in champ.tags %}
-            <span class="tag-badge">{{ tag }}</span>
-            {% endfor %}
-        </div>
+.header h1 {
+    font-size: 24px;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
 
-        <h2 class="section-title">스킬</h2>
+.logo-icon {
+    flex-shrink: 0;
+}
 
-        <div class="skill-card">
-            <div class="skill-header">
-                <img class="skill-icon" src="{{ champ.passive.image }}" alt="{{ champ.passive.name }}">
-                <div class="skill-title-group">
-                    <span class="skill-key passive-key">P</span>
-                    <span class="skill-name">{{ champ.passive.name }}</span>
-                </div>
-                <button class="explain-btn" data-target="desc-passive">쉽게 설명 보기</button>
-            </div>
-            <p class="skill-desc" id="desc-passive">{{ champ.passive.description | safe }}</p>
-        </div>
+.subtitle {
+    font-size: 13px;
+    color: #9aa0ac;
+}
 
-        {% for spell in champ.spells %}
-        <div class="skill-card">
-            <div class="skill-header">
-                <img class="skill-icon" src="{{ spell.image }}" alt="{{ spell.name }}">
-                <div class="skill-title-group">
-                    <span class="skill-key">{{ spell.key }}</span>
-                    <span class="skill-name">{{ spell.name }}</span>
-                </div>
-                <button class="explain-btn" data-target="desc-{{ spell.key }}">쉽게 설명 보기</button>
-            </div>
-            <p class="skill-desc" id="desc-{{ spell.key }}">{{ spell.description | safe }}</p>
-        </div>
-        {% endfor %}
+.search-box {
+    display: flex;
+    align-items: center;
+    background: #1c1f27;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 20px;
+    border: 1px solid #2a2e39;
+    transition: border-color 0.15s ease;
+}
 
-        <p class="ai-note">💡 지금 보이는 설명은 Riot 원문이야. 다음 단계에서 AI가 초보자용으로 쉽게 풀어주는 버전으로 바꿀 거야.</p>
+.search-box:focus-within {
+    border-color: #4f7cff;
+}
 
-    </div>
+.search-icon {
+    margin-right: 8px;
+    font-size: 14px;
+}
 
-    <script>
-        document.querySelectorAll(".explain-btn").forEach(btn => {
-            btn.addEventListener("click", () => {
-                const target = document.getElementById(btn.dataset.target);
-                target.classList.toggle("open");
-                btn.textContent = target.classList.contains("open") ? "설명 접기" : "쉽게 설명 보기";
-            });
-        });
-    </script>
+.search-box input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: #f0f0f0;
+    font-size: 15px;
+}
 
-</body>
-</html>
+.search-box input::placeholder {
+    color: #6b7280;
+}
+
+.count-text {
+    font-size: 12px;
+    color: #6b7280;
+    margin-bottom: 10px;
+    padding-left: 2px;
+}
+
+.filter-bar {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 12px;
+    margin-bottom: 8px;
+    scrollbar-width: none;
+}
+
+.filter-bar::-webkit-scrollbar {
+    display: none;
+}
+
+.filter-btn {
+    flex-shrink: 0;
+    background: #1c1f27;
+    color: #9aa0ac;
+    border: 1px solid #2a2e39;
+    border-radius: 20px;
+    padding: 7px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    white-space: nowrap;
+}
+
+.filter-btn:hover {
+    background: #262a35;
+}
+
+.filter-btn.active {
+    background: #4f7cff;
+    color: #ffffff;
+    border-color: #4f7cff;
+}
+
+.sticky-controls {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: linear-gradient(#0f1117 78%, transparent);
+    padding-top: 4px;
+    margin-top: -4px;
+}
+
+.champion-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+@media (min-width: 480px) {
+    .champion-list {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+@media (min-width: 700px) {
+    .champion-list {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 14px;
+    }
+}
+
+@media (min-width: 900px) {
+    .champion-list {
+        grid-template-columns: repeat(7, 1fr);
+    }
+}
+
+.champion-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: #1c1f27;
+    border: 1px solid #2a2e39;
+    border-radius: 12px;
+    padding: 10px 6px 12px;
+    transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    opacity: 0;
+    animation: card-in 0.35s ease forwards;
+}
+
+@keyframes card-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.champion-card:hover {
+    background: #262a35;
+    border-color: #3a3f4d;
+    transform: translateY(-3px);
+}
+
+.champion-card:active {
+    transform: translateY(0) scale(0.96);
+    background: #21252f;
+}
+
+.champion-img {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #2a2e39;
+    transition: border-color 0.15s ease;
+}
+
+.champion-card:hover .champion-img {
+    border-color: #4f7cff;
+}
+
+.champion-name {
+    font-size: 13px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.empty-state {
+    display: none;
+    text-align: center;
+    color: #6b7280;
+    font-size: 14px;
+    padding: 40px 0;
+}
+
+/* ------------------------------------------------------------ */
+/* 챔피언 상세 페이지 전용 스타일                                    */
+/* ------------------------------------------------------------ */
+
+.back-btn {
+    display: inline-block;
+    color: #9aa0ac;
+    text-decoration: none;
+    font-size: 14px;
+    margin-bottom: 14px;
+    transition: color 0.15s ease;
+}
+
+.back-btn:hover {
+    color: #f0f0f0;
+}
+
+.detail-wrap {
+    animation: card-in 0.3s ease;
+}
+
+@media (min-width: 700px) {
+    .detail-wrap {
+        max-width: 640px;
+        margin: 0 auto;
+    }
+}
+
+.champ-splash {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: -36px;
+}
+
+.champ-splash img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 20%;
+    filter: brightness(0.7);
+}
+
+.champ-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 0 4px;
+    margin-bottom: 14px;
+    position: relative;
+}
+
+.champ-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    border: 3px solid #0f1117;
+    box-shadow: 0 0 0 2px #4f7cff;
+    flex-shrink: 0;
+}
+
+.champ-name {
+    font-size: 22px;
+    margin-bottom: 2px;
+}
+
+.champ-title {
+    font-size: 13px;
+    color: #9aa0ac;
+}
+
+.tag-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 26px;
+    padding: 0 4px;
+}
+
+.tag-badge {
+    background: #1c1f27;
+    border: 1px solid #2a2e39;
+    color: #9aa0ac;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.section-title {
+    font-size: 15px;
+    margin-bottom: 10px;
+    padding-left: 2px;
+}
+
+.skill-card {
+    background: #1c1f27;
+    border: 1px solid #2a2e39;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
+    opacity: 0;
+    animation: card-in 0.35s ease forwards;
+}
+
+.skill-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.skill-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.skill-title-group {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.skill-key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #4f7cff;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    flex-shrink: 0;
+}
+
+.passive-key {
+    background: #6b7280;
+}
+
+.skill-name {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.explain-btn {
+    background: transparent;
+    border: 1px solid #2a2e39;
+    color: #4f7cff;
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.explain-btn:hover {
+    background: #262a35;
+}
+
+.explain-btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.spinner {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border: 2px solid #3a3f4d;
+    border-top-color: #4f7cff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 4px;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.skill-desc {
+    display: none;
+    font-size: 13px;
+    color: #c3c7cf;
+    line-height: 1.6;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #2a2e39;
+}
+
+.skill-desc.open {
+    display: block;
+}
+
+.ai-note {
+    font-size: 12px;
+    color: #6b7280;
+    text-align: center;
+    margin-top: 20px;
+    line-height: 1.5;
+}
+
+/* 추천 스킬 순서 카드 */
+.priority-card {
+    background: linear-gradient(135deg, #1c1f27, #1a2038);
+    border: 1px solid #35406b;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 22px;
+}
+
+.priority-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.priority-icon {
+    font-size: 14px;
+}
+
+.priority-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #9db4ff;
+}
+
+.priority-text {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #dfe2e8;
+    white-space: pre-line;
+}
